@@ -35,6 +35,21 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
+    <Page Include="Controls\CustomButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
+    <Page Include="Controls\ImageStates.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
+    <Page Include="Controls\ImageButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
     <Page Include="Controls\Rating.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -45,13 +60,16 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\CustomButton.cs" />
+    <Compile Include="Controls\ImageStates.cs" />
+    <Compile Include="Controls\ImageButton.cs" />
     <Compile Include="Controls\Rating.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\ic_star_mid_48dp.scale-240.png" />
-    <Content Include="Assets\ic_star_off_48dp.scale-240.png" />
-    <Content Include="Assets\ic_star_on_48dp.scale-240.png" />
+    <Content Include="Assets\ic_star_mid_48dp.png" />
+    <Content Include="Assets\ic_star_off_48dp.png" />
+    <Content Include="Assets\ic_star_on_48dp.png" />
   </ItemGroup>
   <ItemGroup>
     <TargetPlatform Include="Windows, Version=8.1" />

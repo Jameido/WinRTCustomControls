@@ -9,22 +9,108 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
-namespace CustomControls.Controls
+namespace WinRTCustomControls.Controls
 {
     public class Rating : Control
     {
         private StackPanel starContainer;
+        private double size;
 
         public Rating()
         {
             this.DefaultStyleKey = typeof(Rating);
+            ManipulationMode = ManipulationModes.TranslateX;
+            ManipulationDelta += Rating_ManipulationDelta;
+            ManipulationCompleted += Rating_ManipulationCompleted;
         }
 
         protected override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
             starContainer = GetTemplateChild("starContainer") as StackPanel;
+            if (starContainer != null)
+                starContainer.SizeChanged += StarContainer_SizeChanged;
             AddStars();
+        }
+
+        private void StarContainer_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            size = starContainer.ActualWidth;
+        }
+
+        private void Rating_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            if (starContainer != null && size > 0)
+            {
+                Value = Math.Round((e.Position.X / size) * TotalStars * 2, MidpointRounding.AwayFromZero) / 2;
+            }
+        }
+
+        private void Rating_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
+        {
+            if (starContainer != null && size > 0)
+            {
+                Value = Math.Round((e.Position.X / size) * TotalStars * 2, MidpointRounding.AwayFromZero) / 2;
+
+                if (ValueChanged != null)
+                {
+                    ValueChanged(this, Value);
+                }
+            }
+        }
+
+        private void SetupStars()
+        {
+            if (starContainer != null)
+            {
+                for (int i = 0; i < starContainer.Children.Count; i++)
+                {
+                    var img = starContainer.Children[i];
+                    if (img.GetType() == typeof(Image))
+                        SetSource(img as Image, i);
+                }
+            }
+        }
+
+        private void AddStars()
+        {
+            if (starContainer != null)
+            {
+                starContainer.Children.Clear();
+                for (int i = 0; i < TotalStars; i++)
+                {
+                    var star = new Image();
+                    if (!IsIndicator)
+                        star.Tapped += Star_Tapped;
+                    starContainer.Children.Add(star);
+                }
+                SetupStars();
+            }
+        }
+
+        private void Star_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (starContainer != null)
+            {
+                var index = starContainer.Children.IndexOf(sender as Image);
+                Value = index + 1;
+            }
+            if (ValueChanged != null)
+            {
+                ValueChanged(this, Value);
+            }
+        }
+
+        private void SetSource(Image star, int index)
+        {
+            var starValue = Value - (double)index;
+
+            if (starValue > 0.7)
+                star.Source = FullStarSource;
+            else if (starValue < 0.4)
+                star.Source = EmptyStarSource;
+            else
+                star.Source = HalfStarSource;
         }
 
         #region DependencyProperties
@@ -35,7 +121,7 @@ namespace CustomControls.Controls
         }
         public static readonly DependencyProperty FullStarSourceProperty =
           DependencyProperty.Register("FullStarSource", typeof(ImageSource), typeof(Rating),
-              new PropertyMetadata(new BitmapImage(new Uri("ms-appx:///CustomControls/Assets/ic_star_on_48dp.png")), new PropertyChangedCallback(OnFullStarChanged)));
+              new PropertyMetadata(new BitmapImage(new Uri("ms-appx:///WinRTCustomControls/Assets/ic_star_on_48dp.png")), new PropertyChangedCallback(OnFullStarChanged)));
 
         private static void OnFullStarChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -50,7 +136,7 @@ namespace CustomControls.Controls
         }
         public static readonly DependencyProperty HalfStarSourceProperty =
           DependencyProperty.Register("HalfStarSource", typeof(ImageSource), typeof(Rating),
-              new PropertyMetadata(new BitmapImage(new Uri("ms-appx:///CustomControls/Assets/ic_star_mid_48dp.png")), new PropertyChangedCallback(OnHalfStarChanged)));
+              new PropertyMetadata(new BitmapImage(new Uri("ms-appx:///WinRTCustomControls/Assets/ic_star_mid_48dp.png")), new PropertyChangedCallback(OnHalfStarChanged)));
 
         private static void OnHalfStarChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -65,7 +151,7 @@ namespace CustomControls.Controls
         }
         public static readonly DependencyProperty EmptyStarSourceProperty =
           DependencyProperty.Register("EmptyStarSource", typeof(ImageSource), typeof(Rating),
-              new PropertyMetadata(new BitmapImage(new Uri("ms-appx:///CustomControls/Assets/ic_star_off_48dp.png")), new PropertyChangedCallback(OnEmptyStarChanged)));
+              new PropertyMetadata(new BitmapImage(new Uri("ms-appx:///WinRTCustomControls/Assets/ic_star_off_48dp.png")), new PropertyChangedCallback(OnEmptyStarChanged)));
 
         private static void OnEmptyStarChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -116,80 +202,5 @@ namespace CustomControls.Controls
 
         public event ValueChangedEventHandler ValueChanged;
         #endregion
-
-        private void SetupStars()
-        {
-            if (starContainer != null)
-            {
-                for (int i = 0; i < starContainer.Children.Count; i++)
-                {
-                    var img = starContainer.Children[i];
-                    if (img.GetType() == typeof(Image))
-                        SetSource(img as Image, i);
-                }
-
-            }
-        }
-
-        private void AddStars()
-        {
-            if (starContainer != null)
-            {
-                starContainer.Children.Clear();
-                for (int i = 0; i < TotalStars; i++)
-                {
-                    var star = new Image();
-                    if (!IsIndicator)
-                        star.Tapped += Star_Tapped;
-                    starContainer.Children.Add(star);
-                }
-                SetupStars();
-            }
-        }
-
-        private void Star_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            if (starContainer != null)
-            {
-                var index = starContainer.Children.IndexOf(sender as Image);
-                Value = index + 1;
-            }
-            if (ValueChanged != null)
-            {
-                ValueChanged(this, Value);
-            }
-            e.Handled = true;
-        }
-
-        private void SetSource(Image star, int index)
-        {
-            //Set fullstars
-            if (index + 1 <= Value)
-            {
-                star.Source = FullStarSource;
-                return;
-            }
-            if (index < Value)
-            {
-                //Set halfstars
-                double decVal = Value - Math.Truncate(Value);
-                if (decVal == 0)
-                {
-
-                }
-                if (decVal < 0.4)
-                {
-                    star.Source = EmptyStarSource;
-                    return;
-                }
-                if (decVal < 0.7)
-                {
-                    star.Source = HalfStarSource;
-                    return;
-                }
-            }
-            star.Source = EmptyStarSource;
-            return;
-        }
     }
 }

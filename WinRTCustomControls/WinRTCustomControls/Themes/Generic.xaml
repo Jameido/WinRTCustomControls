@@ -1,5 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="ms-appx:///CustomControls/Controls/Rating.xaml" />
+        <ResourceDictionary Source="ms-appx:///WinRTCustomControls/Controls/Rating.xaml" />
+        <ResourceDictionary Source="ms-appx:///WinRTCustomControls/Controls/CustomButton.xaml" />
+        <ResourceDictionary Source="ms-appx:///WinRTCustomControls/Controls/ImageStates.xaml" />
+        <ResourceDictionary Source="ms-appx:///WinRTCustomControls/Controls/ImageButton.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
