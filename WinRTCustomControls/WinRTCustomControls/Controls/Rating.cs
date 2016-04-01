@@ -20,8 +20,6 @@ namespace WinRTCustomControls.Controls
         {
             this.DefaultStyleKey = typeof(Rating);
             ManipulationMode = ManipulationModes.TranslateX;
-            ManipulationDelta += Rating_ManipulationDelta;
-            ManipulationCompleted += Rating_ManipulationCompleted;
         }
 
         protected override void OnApplyTemplate()
@@ -31,6 +29,7 @@ namespace WinRTCustomControls.Controls
             if (starContainer != null)
                 starContainer.SizeChanged += StarContainer_SizeChanged;
             AddStars();
+            SetIndicatorHandlers();
         }
 
         private void StarContainer_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -101,6 +100,28 @@ namespace WinRTCustomControls.Controls
             }
         }
 
+        private void SetIndicatorHandlers()
+        {
+            if (IsIndicator)
+            {
+                ManipulationDelta -= Rating_ManipulationDelta;
+                ManipulationCompleted -= Rating_ManipulationCompleted;
+                if (starContainer != null)
+                    foreach (var i in starContainer.Children)
+                        if (i.GetType() == typeof(Image))
+                            i.Tapped -= Star_Tapped;
+            }
+            else
+            {
+                ManipulationDelta += Rating_ManipulationDelta;
+                ManipulationCompleted += Rating_ManipulationCompleted;
+                if (starContainer != null)
+                    foreach (var i in starContainer.Children)
+                        if (i.GetType() == typeof(Image))
+                            i.Tapped += Star_Tapped;
+            }
+        }
+
         private void SetSource(Image star, int index)
         {
             var starValue = Value - (double)index;
@@ -165,7 +186,13 @@ namespace WinRTCustomControls.Controls
             set { base.SetValue(IsIndicatorProperty, value); }
         }
         public static readonly DependencyProperty IsIndicatorProperty =
-          DependencyProperty.Register("IsIndicator", typeof(bool), typeof(Rating), null);
+          DependencyProperty.Register("IsIndicator", typeof(bool), typeof(Rating), new PropertyMetadata(false, new PropertyChangedCallback(OnIsIndicatorChanged)));
+
+        public static void OnIsIndicatorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var instance = d as Rating;
+            instance.SetIndicatorHandlers();
+        }
 
         public double Value
         {
